@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>weatherMap</title>
+    <style>
+        #view {
+            padding: 10px;
+            border: 4px solid #6f28bb;
+            position: absolute;
+            top: 78px;
+            left: 10px;
+            width: 300px;
+            background-color: aliceblue;
+            height: 500px;
+            overflow: auto;
+        }
+
+        img {
+            width: 50px;
+        }
+
+        #view>div {
+            border-bottom: 1px dotted #3838ab;
+            font-size: medium;
+        }
+
+        .bold {
+            font-weight: bold;
+        }
+
+        h2 {
+            font-size: x-large;
+            color: #f1071e;
+        }
+
+        #myMap {
+            width: 1000px;
+            height: 560px;
+        }
+    </style>
+</head>
+
+<body>
+    <div>
+        <h1>
+            現在地：<span id="geocode"></span>の天気5日間！
+        </h1>
+        <div id="myMap"></div>
+        <div id="view"></div>
+    </div>
+
+    <script
+        src='https://www.bing.com/api/maps/mapcontrol?callback=GetMap&key=As9A4gB4JEOrJjHl6nq84lsNltpywnNg0E_0ZYbMQpBmLoYDhPpMuRgIt99ZFonT'
+        async defer></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
+    <script src="js/BmapQuery.js"></script>
+    <script>
+        //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+        //MAP表示処理
+        //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+        const key = "9c47d9af1f813c5e62eba4bc9231379f";  //***自分のKEYを！！！！！！！！！！！！！！！***
+        let lat = "43.062839";
+        let lon = "141.354523";
+        let geocode = "";
+        const icon = "http://openweathermap.org/img/wn/";
+        function GetMap() {
+            const map = new Bmap("#myMap");
+            map.geolocation(function (data) {
+                //location
+                lat = data.coords.latitude;
+                lon = data.coords.longitude;
+                //Map
+                map.startMap(lat, lon, "load", 14);
+                //pin
+                map.pin(lat, lon, "#ff0000");
+                //住所を取得
+                const location = map.setLocation(lat, lon);
+                map.reverseGeocode(location, function (data) {
+                    console.log(data);
+                    $("#geocode").html(data);
+                });
+            });
+        }
+
+
+        //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+        //OpenWeatherAPI（天気情報を取得）5DAY/3hour
+        //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
+        const url = 'https://api.openweathermap.org/data/2.5/forecast?lat=' + lat + '&lon=' + lon + '&appid=' + key + '&lang=ja';
+        $.ajax({
+            url: url,
+            type: 'get',
+            cache: false,
+            dataType: 'json'
+        }).done(function (data) {
+            const br = "<br>";
+            const time = ' 00:00:00'; //この時間は強調する！
+            let html = "";
+            for (let i = 0; i < data.list.length; i++) {
+                //もしも時間に00:00:00が入っていたら次の日付を強調する
+                if (data.list[i].dt_txt.indexOf(time) != -1) {
+                    const str = data.list[i].dt_txt.replace("00:00:00", "");
+                    html += "<h2>" + str + "</h2>";
+                }
+                html += `
+                    <div>
+                        <div>時刻：${data.list[i].dt_txt}</div>
+                        <div>風速：${data.list[i].wind.speed}</div>
+                        <div>天気：${data.list[i].weather[0].description}</div>
+                        <div>降水確率：${data.list[i].pop * 100}</div>
+                        <div><img src="${icon + data.list[i].weather[0].icon}@2x.png"></div>
+                    </div>
+                `;
+
+            }
+            //作成したHTML埋め込む
+            $("#view").append(html);
+
+            //場所
+            $("#area").html(data.city.name)
+        });
+</script>
+
+        <!--** 以下Firebase **-->
+        <script type="module">
+            // Import the functions you need from the SDKs you need
+            import {initializeApp} from "firebase/app";
+            import {getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved}
+            from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+            // TODO: Add SDKs for Firebase products that you want to use
+            https://firebase.google.com/docs/web/setup#available-libraries;
+
+            // Your web app's Firebase configuration
+            const firebaseConfig = {
+            apiKey: "AIzaSyCqGkEk0hFVBQMDgptzsmpIUid1Yn5kLrY",
+            authDomain: "chat-0507-2db29.firebaseapp.com",
+            projectId: "chat-0507-2db29",
+            storageBucket: "chat-0507-2db29.appspot.com",
+            messagingSenderId: "128708019200",
+            appId: "1:128708019200:web:2ad5914726349e1c5544e5"
+        };
+
+            // Initialize Firebase
+            const app = initializeApp(firebaseConfig);
+
+    </script>
+</body>
+
+</html>
