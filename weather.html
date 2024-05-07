@@ -58,7 +58,37 @@
         async defer></script>
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.1/jquery.min.js"></script>
     <script src="js/BmapQuery.js"></script>
-    <script>
+
+    <script type="module">
+import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+            from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+
+
+
+        // Import the functions you need from the SDKs you need
+        // import { initializeApp } from "firebase/app";
+        // import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+            // from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.goo/le.com/docs/web/setup#available-libraries;
+
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyCqGkEk0hFVBQMDgptzsmpIUid1Yn5kLrY",
+            authDomain: "chat-0507-2db29.firebaseapp.com",
+            projectId: "chat-0507-2db29",
+            storageBucket: "chat-0507-2db29.appspot.com",
+            messagingSenderId: "128708019200",
+            appId: "1:128708019200:web:2ad5914726349e1c5544e5"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);//RDBを使うよって意味
+        const dbRef = ref(db, "weather"); //RDBの”chat”を使うよ
+
+        
         //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
         //MAP表示処理
         //＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝＝
@@ -116,6 +146,17 @@
                     </div>
                 `;
 
+                let weather = {
+                    dt_text: data.list[i].dt_txt,
+                    dt_wind: data.list[i].wind.speed,
+                    dt_weather: data.list[i].weather[0].description,
+                    dt_pop: data.list[i].pop * 100
+                }
+
+                const a = push(dbRef);
+                set(a, weather);
+
+
             }
             //作成したHTML埋め込む
             $("#view").append(html);
@@ -123,31 +164,12 @@
             //場所
             $("#area").html(data.city.name)
         });
-</script>
-
-        <!--** 以下Firebase **-->
-        <script type="module">
-            // Import the functions you need from the SDKs you need
-            import {initializeApp} from "firebase/app";
-            import {getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved}
-            from "https://www.gstatic.com/firebasejs/9.1.0/firebase-database.js";
-            // TODO: Add SDKs for Firebase products that you want to use
-            https://firebase.google.com/docs/web/setup#available-libraries;
-
-            // Your web app's Firebase configuration
-            const firebaseConfig = {
-            apiKey: "AIzaSyCqGkEk0hFVBQMDgptzsmpIUid1Yn5kLrY",
-            authDomain: "chat-0507-2db29.firebaseapp.com",
-            projectId: "chat-0507-2db29",
-            storageBucket: "chat-0507-2db29.appspot.com",
-            messagingSenderId: "128708019200",
-            appId: "1:128708019200:web:2ad5914726349e1c5544e5"
-        };
-
-            // Initialize Firebase
-            const app = initializeApp(firebaseConfig);
-
     </script>
+
+
+
+    <!--** 以下Firebase **-->
+
 </body>
 
 </html>
